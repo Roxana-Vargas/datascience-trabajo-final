@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictor de Salarios - Data Science</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        .form-container {
+            padding: 40px 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 5px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control:hover {
+            border-color: #d1d5db;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 45px;
+        }
+
+        .btn-predict {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .btn-predict:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-subtitle {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-card-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .info-card-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer p {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .result-value {
+                font-size: 2.2rem;
+            }
+            
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h1>Predictor de Salarios</h1>
+            <p>Modelo de Machine Learning para Data Science</p>
+        </div>
+
+        <div class="form-container">
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="work_year">
+                            <i class="fas fa-calendar-alt"></i>Año de Trabajo
+                        </label>
+                        <input type="number" id="work_year" name="work_year" class="form-control" 
+                               value="2024" min="2020" max="2030" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience_level">
+                            <i class="fas fa-user-tie"></i>Nivel de Experiencia
+                        </label>
+                        <select id="experience_level" name="experience_level" class="form-control" required>
+                            <option value="0">Entry Level (Junior)</option>
+                            <option value="1">Junior</option>
+                            <option value="2">Mid-Level</option>
+                            <option value="3" selected>Senior</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employment_type">
+                            <i class="fas fa-briefcase"></i>Tipo de Empleo
+                        </label>
+                        <select id="employment_type" name="employment_type" class="form-control" required>
+                            <option value="0">Freelance</option>
+                            <option value="1">Part-Time</option>
+                            <option value="2" selected>Full-Time</option>
+                            <option value="3">Contract</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company_size">
+                            <i class="fas fa-building"></i>Tamaño de Empresa
+                        </label>
+                        <select id="company_size" name="company_size" class="form-control" required>
+                            <option value="0">Pequeña (S)</option>
+                            <option value="1" selected>Mediana (M)</option>
+                            <option value="2">Grande (L)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="job_title">
+                            <i class="fas fa-id-badge"></i>Título del Trabajo
+                        </label>
+                        <select id="job_title" name="job_title" class="form-control" required>
+                            <option value="114" selected>Data Scientist</option>
+                            <option value="95">Data Analyst</option>
+                            <option value="85">Data Engineer</option>
+                            <option value="75">ML Engineer</option>
+                            <option value="50">BI Analyst</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="remote_ratio">
+                            <i class="fas fa-home"></i>Trabajo Remoto
+                        </label>
+                        <select id="remote_ratio" name="remote_ratio" class="form-control" required>
+                            <option value="0">Presencial (0%)</option>
+                            <option value="50">Híbrido (50%)</option>
+                            <option value="100">Remoto (100%)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employee_residence">
+                            <i class="fas fa-map-marker-alt"></i>País de Residencia
+                        </label>
+                        <select id="employee_residence" name="employee_residence" class="form-control" required>
+                            <option value="91" selected>Estados Unidos</option>
+                            <option value="64">España</option>
+                            <option value="86">Reino Unido</option>
+                            <option value="30">Alemania</option>
+                            <option value="25">Canadá</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company_location">
+                            <i class="fas fa-globe"></i>Ubicación Empresa
+                        </label>
+                        <select id="company_location" name="company_location" class="form-control" required>
+                            <option value="86" selected>Estados Unidos</option>
+                            <option value="64">España</option>
+                            <option value="62">Reino Unido</option>
+                            <option value="30">Alemania</option>
+                            <option value="25">Canadá</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-predict" id="btnPredict">
+                    <i class="fas fa-magic"></i>
+                    <span>Predecir Salario</span>
+                    <div class="spinner" id="spinner"></div>
+                </button>
+            </form>
+
+            <div class="result-container" id="resultContainer">
+                <div class="result-label">Salario Anual Estimado</div>
+                <div class="result-value" id="resultValue">$0.00</div>
+                <div class="result-subtitle">USD por año</div>
+                
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="info-card-label">Salario Mensual</div>
+                        <div class="info-card-value" id="monthlyValue">$0.00</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-label">Nivel de Experiencia</div>
+                        <div class="info-card-value" id="experienceLabel">Senior</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Trabajo Final - Modelo de Machine Learning para Predicción de Salarios</p>
+        </div>
+    </div>
+
+    <script>
+        const experienceLevels = {
+            0: 'Entry Level',
+            1: 'Junior',
+            2: 'Mid-Level',
+            3: 'Senior'
+        };
+
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnPredict');
+            const spinner = document.getElementById('spinner');
+            const btnText = btn.querySelector('span');
+            const btnIcon = btn.querySelector('i');
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = 'Prediciendo...';
+            btnIcon.style.display = 'none';
+            
+            const formData = {
+                work_year: parseInt(document.getElementById('work_year').value),
+                experience_level: parseInt(document.getElementById('experience_level').value),
+                employment_type: parseInt(document.getElementById('employment_type').value),
+                job_title: parseInt(document.getElementById('job_title').value),
+                employee_residence: parseInt(document.getElementById('employee_residence').value),
+                remote_ratio: parseInt(document.getElementById('remote_ratio').value),
+                company_location: parseInt(document.getElementById('company_location').value),
+                company_size: parseInt(document.getElementById('company_size').value)
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                // Format salary with commas
+                const salary = data.predicted_salary;
+                const formattedSalary = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(salary);
+                
+                const monthlySalary = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(salary / 12);
+                
+                document.getElementById('resultValue').textContent = formattedSalary;
+                document.getElementById('monthlyValue').textContent = monthlySalary;
+                document.getElementById('experienceLabel').textContent = experienceLevels[formData.experience_level];
+                document.getElementById('resultContainer').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al realizar la predicción. Por favor, intente de nuevo.');
+            } finally {
+                // Reset button state
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Predecir Salario';
+                btnIcon.style.display = 'inline';
+            }
+        });
+    </script>
+</body>
+</html>
